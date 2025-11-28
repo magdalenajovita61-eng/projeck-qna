@@ -1,38 +1,13 @@
 <?php
-session_start();
-if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php');
-    exit;
-}
-
 include 'header.php';
-include '../controller/forum_controller.php'; // Include controller
-
-// Get user's school_id
-$user = get_user_by_id($_SESSION['user_id']);
-$school_id = $user['school_id'] ?? null;
-
-$display_type = $_GET['type'] ?? 'questions';
-
-// Validate user and school_id
-if (!$user || !$school_id) {
-    $top_answers = [];
-    $top_questions = [];
-} else {
-    if ($display_type === 'answers') {
-        $top_answers = get_top_answers_by_votes_by_school($school_id);
-    } else {
-        $top_questions = get_top_questions_by_comments($school_id);
-    }
-}
 ?>
 
 <div class="container top10-page">
     <h2>Top 10 <?php echo ($display_type === 'answers') ? 'Jawaban Terbaik' : 'Pertanyaan Terbaik'; ?></h2>
 
     <div class="toggle-links" style="margin-bottom: 15px;">
-        <a href="top10.php?type=questions" <?php if ($display_type === 'questions') echo 'style="font-weight: bold; text-decoration: underline;"'; ?>>Pertanyaan Terbaik</a> |
-        <a href="top10.php?type=answers" <?php if ($display_type === 'answers') echo 'style="font-weight: bold; text-decoration: underline;"'; ?>>Jawaban Terbaik</a>
+        <a href="../controller/top10_controller.php?type=questions" <?php if ($display_type === 'questions') echo 'style="font-weight: bold; text-decoration: underline;"'; ?>>Pertanyaan Terbaik</a> |
+        <a href="../controller/top10_controller.php?type=answers" <?php if ($display_type === 'answers') echo 'style="font-weight: bold; text-decoration: underline;"'; ?>>Jawaban Terbaik</a>
     </div>
 
 <?php if ($display_type === 'answers'): ?>

@@ -37,17 +37,25 @@ function create_comment($user_id, $question_id, $answer_id, $body) {
     global $conn;
     $user_id = mysqli_real_escape_string($conn, $user_id);
     $question_id = mysqli_real_escape_string($conn, $question_id);
-    
+
     if (empty($answer_id)) {
         $answer_id_sql = "NULL";
     } else {
         $answer_id_sql = "'" . mysqli_real_escape_string($conn, $answer_id) . "'";
     }
-    
+
     $body = mysqli_real_escape_string($conn, $body);
-    
-    $query = "INSERT INTO comment (user_id, question_id, answer_id, body, created_at) 
+
+    $query = "INSERT INTO comment (user_id, question_id, answer_id, body, created_at)
               VALUES ('$user_id', '$question_id', $answer_id_sql, '$body', NOW())";
     return mysqli_query($conn, $query);
+}
+
+function get_last_comment_by_user($user_id) {
+    global $conn;
+    $user_id = mysqli_real_escape_string($conn, $user_id);
+    $query = "SELECT * FROM comment WHERE user_id = '$user_id' ORDER BY created_at DESC LIMIT 1";
+    $result = mysqli_query($conn, $query);
+    return mysqli_fetch_assoc($result);
 }
 ?>

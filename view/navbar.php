@@ -1,9 +1,4 @@
 <?php
-require_once '../model/user_model.php';
-require_once '../model/question_model.php';
-
-$user = get_user_by_id($_SESSION['user_id']);
-$user_questions = get_user_questions($_SESSION['user_id']);
 ?>
 <style>
     /* Navbar container */
@@ -123,12 +118,10 @@ $user_questions = get_user_questions($_SESSION['user_id']);
             <p><?php echo htmlspecialchars($user['school_name']); ?></p>
         </div>
         <div class="nav-links">
-            <a href="dashboard.php" title="Dashboard">Forum QnA</a>
-            <a href="top10.php" title="Top 10 Questions">Top 10</a>
+            <a href="../controller/dashboard_controller.php" title="Dashboard">Forum QnA</a>
+            <a href="../controller/top10_controller.php" title="Top 10 Questions">Top 10</a>
             <?php if ($_SESSION['role'] == 'teacher'): ?>
-                <a href="teacher_dashboard.php" title="Kelola User">Kelola User</a>
-            <?php elseif ($_SESSION['role'] == 'admin'): ?>
-                <a href="admin_dashboard.php" title="Admin Dashboard">Admin Dashboard</a>
+                <a href="../controller/teacher_controller.php?action=dashboard" title="Kelola User">Kelola User</a>
             <?php endif; ?>
             <a href="../controller/auth_controller.php?action=logout" title="Logout">Logout</a>
         </div>
@@ -144,7 +137,7 @@ $user_questions = get_user_questions($_SESSION['user_id']);
                     <p>Tidak ada riwayat pertanyaan.</p>
                 <?php else: ?>
                     <?php foreach ($user_questions as $question): ?>
-                        <a href="question_detail.php?id=<?php echo $question['question_id']; ?>" class="question-history-item" title="<?php echo htmlspecialchars($question['title']); ?>">
+                        <a href="../controller/forum_controller.php?action=question_detail&id=<?php echo $question['question_id']; ?>" class="question-history-item" title="<?php echo htmlspecialchars($question['title']); ?>">
                             <?php echo htmlspecialchars(mb_strimwidth($question['title'], 0, 50, "...")); ?>
                             <small><?php echo date('d M Y', strtotime($question['created_at'])); ?></small>
                         </a>

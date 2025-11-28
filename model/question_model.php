@@ -125,5 +125,43 @@ function assign_tag_to_question($question_id, $tag_id) {
     return mysqli_query($conn, "INSERT INTO question_tag (question_id, tag_id) VALUES ('$question_id', '$tag_id')");
 }
 
+function get_top_questions_by_comments($school_id) {
+    global $conn;
+    $school_id = mysqli_real_escape_string($conn, $school_id);
+    $query = "SELECT q.question_id, q.title, q.body, u.name as user_name, COUNT(c.comment_id) as total_comments
+              FROM question q
+              JOIN user u ON q.user_id = u.user_id
+              LEFT JOIN comment c ON q.question_id = c.question_id
+              WHERE u.school_id = '$school_id'
+              GROUP BY q.question_id
+              ORDER BY total_comments DESC
+              LIMIT 10";
+    $result = mysqli_query($conn, $query);
+    $top_questions = [];
+    while ($row = mysqli_fetch_assoc($result)) {
+        $top_questions[] = $row;
+    }
+    return $top_questions;
+}
+
+function get_top_answers_by_votes_by_school($school_id) {
+    global $conn;
+    $school_id = mysqli_real_escape_string($conn, $school_id);
+    $query = "SELECT a.*, u.name as user_name, q.title as question_title, SUM(v.vote_value) as total_votes
+              FROM answer a
+              JOIN user u ON a.user_id = u.user_id
+              JOIN question q ON a.question_id = q.question_id
+              LEFT JOIN vote v ON a.answer_id = v.answer_id
+              WHERE u.school_id = '$school_id'
+              GROUP BY a.answer_id
+              ORDER BY total_votes DESC
+              LIMIT 10";
+    $result = mysqli_query($conn, $query);
+    $top_answers = [];
+    while ($row = mysqli_fetch_assoc($result)) {
+        $top_answers[] = $row;
+    }
+    return $top_answers;
+}
 
 ?>

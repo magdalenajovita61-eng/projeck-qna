@@ -16,13 +16,13 @@ function register() {
         // Validasi
         if (empty($name) || empty($email) || empty($password) || (empty($school_id) && empty($new_school_name)) || empty($role)) {
             $_SESSION['error'] = "Semua field harus diisi";
-            header('Location: ../view/register.php');
+            header('Location: ../controller/auth_controller.php?action=register');
             exit;
         }
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $_SESSION['error'] = "Email tidak valid";
-            header('Location: ../view/register.php');
+            header('Location: ../controller/auth_controller.php?action=register');
             exit;
         }
 
@@ -30,7 +30,7 @@ function register() {
         $existing_user = get_user_by_email($email);
         if ($existing_user) {
             $_SESSION['error'] = "Email sudah terdaftar";
-            header('Location: ../view/register.php');
+            header('Location: ../controller/auth_controller.php?action=register');
             exit;
         }
 
@@ -39,7 +39,7 @@ function register() {
             $new_school_id = add_school($new_school_name);
             if ($new_school_id === false) {
                 $_SESSION['error'] = "Gagal menambahkan sekolah baru";
-                header('Location: ../view/register.php');
+                header('Location: ../controller/auth_controller.php?action=register');
                 exit;
             }
             $school_id = $new_school_id;
@@ -48,11 +48,11 @@ function register() {
         // Buat user baru tanpa password hashing (plain text)
         if (create_user($name, $email, $password, $school_id, $role)) {
             $_SESSION['success'] = "Registrasi berhasil. Silakan login.";
-            header('Location: ../view/login.php');
+            header('Location: ../controller/auth_controller.php?action=login');
             exit;
         } else {
             $_SESSION['error'] = "Registrasi gagal";
-            header('Location: ../view/register.php');
+            header('Location: ../controller/auth_controller.php?action=register');
             exit;
         }
     }
@@ -64,13 +64,20 @@ function login() {
         $password = $_POST['password'];
         $selected_role = $_POST['role'];
 
-        $user = get_user_by_email($email);
+        // Since emails can be duplicate, find user by email and password
+        global $conn;
+        $email = mysqli_real_escape_string($conn, $email);
+        $password = mysqli_real_escape_string($conn, $password);
 
-        if ($user && $password === $user['password']) {
+        $query = "SELECT u.*, s.school_name FROM user u JOIN school s ON u.school_id = s.school_id WHERE u.email = '$email' AND u.password = '$password'";
+        $result = mysqli_query($conn, $query);
+        $user = mysqli_fetch_assoc($result);
+
+        if ($user) {
             // Verify selected role matches user's actual role
             if ($selected_role !== $user['role']) {
                 $_SESSION['error'] = "Role yang dipilih tidak sesuai dengan akun";
-                header('Location: ../view/login.php');
+                header('Location: ../controller/auth_controller.php?action=login');
                 exit;
             }
 
@@ -84,15 +91,13 @@ function login() {
             // Redirect based on role
             if ($user['role'] === 'teacher') {
                 header('Location: ../controller/teacher_controller.php?action=dashboard');
-            } elseif ($user['role'] === 'admin') {
-                header('Location: ../controller/admin_controller.php?action=dashboard');
             } else {
-                header('Location: ../view/dashboard.php');
+                header('Location: ../controller/dashboard_controller.php');
             }
             exit;
         } else {
             $_SESSION['error'] = "Email atau password salah";
-            header('Location: ../view/login.php');
+            header('Location: ../controller/auth_controller.php?action=login');
             exit;
         }
     }
@@ -112,7 +117,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } elseif ($action == 'login') {
         login();
     }
-} elseif (isset($_GET['action']) && $_GET['action'] == 'logout') {
-    logout();
+} elseif (isset($_GET['action'])) {
+    $action = $_GET['action'];
+    switch ($action) {
+        case 'login':
+            include '../view/login.php';
+            break;
+        case 'register':
+            include '../view/register.php';
+            break;
+        case 'dashboard':
+            if (!isset($_SESSION['user_id'])) {
+                header('Location: ../controller/auth_controller.php?action=login');
+                exit;
+            }
+            header('Location: ../controller/dashboard_controller.php');
+            exit;
+            break;
+        case 'logout':
+            logout();
+            break;
+        default:
+            header('HTTP/1.0 404 Not Found');
+            echo 'Action not found';
+            break;
+    }
+} else {
+    // Default action: check session and redirect
+    if (isset($_SESSION['user_id'])) {
+        header('Location: ../controller/auth_controller.php?action=dashboard');
+    } else {
+        header('Location: ../controller/auth_controller.php?action=login');
+    }
+    exit;
 }
 ?>

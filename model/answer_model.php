@@ -22,10 +22,18 @@ function create_answer($question_id, $user_id, $body) {
     $question_id = mysqli_real_escape_string($conn, $question_id);
     $user_id = mysqli_real_escape_string($conn, $user_id);
     $body = mysqli_real_escape_string($conn, $body);
-    
-    $query = "INSERT INTO answer (question_id, user_id, body, created_at) 
+
+    $query = "INSERT INTO answer (question_id, user_id, body, created_at)
               VALUES ('$question_id', '$user_id', '$body', NOW())";
     return mysqli_query($conn, $query);
+}
+
+function get_last_answer_by_user($user_id) {
+    global $conn;
+    $user_id = mysqli_real_escape_string($conn, $user_id);
+    $query = "SELECT * FROM answer WHERE user_id = '$user_id' ORDER BY created_at DESC LIMIT 1";
+    $result = mysqli_query($conn, $query);
+    return mysqli_fetch_assoc($result);
 }
 
 function get_answer_by_id($answer_id) {

@@ -1,36 +1,5 @@
 <?php
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-
 include 'header.php';
-include "../koneksi.php";
-require_once "../model/question_model.php";
-require_once "../model/tag_model.php";
-
-// Pagination setup
-$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-$limit = 10;
-$offset = ($page - 1) * $limit;
-
-$tag_filter = $_GET['tag_id'] ?? null;
-
-if ($tag_filter) {
-    $questions = fetch_questions_by_tag($tag_filter, $limit, $offset);
-    // Get total count for pagination
-    $total_result = fetch_questions_by_tag($tag_filter);
-    $total_questions = mysqli_num_rows($total_result);
-} else {
-    $questions = get_all_questions($limit, $offset);
-    // Get total count for pagination
-    $total_result = get_all_questions();
-    $total_questions = mysqli_num_rows($total_result);
-}
-
-// Calculate total pages
-$total_pages = ceil($total_questions / $limit);
-
-
-$tags = get_all_tags();
 ?>
 
 <div class="container dashboard">
@@ -39,7 +8,7 @@ $tags = get_all_tags();
 
     <form method="GET" style="margin-bottom: 20px;" class="form-group">
         <label>Filter Tag:</label>
-        <select name="tag_id" onchange="this.form.submit()">
+        <select name="tag_id" onchange="this.form.page.value=1; this.form.submit()">
             <option value="">-- Pilih Tag --</option>
             <?php mysqli_data_seek($tags, 0);
             while ($tag = mysqli_fetch_assoc($tags)) { ?>
@@ -49,6 +18,7 @@ $tags = get_all_tags();
                 </option>
             <?php } ?>
         </select>
+        <input type="hidden" name="page" value="1">
     </form>
 
     <div class="ask-question">
@@ -94,7 +64,7 @@ $tags = get_all_tags();
         <?php while ($question = mysqli_fetch_assoc($questions)): ?>
             <div class="question-item question">
                 <h4>
-                    <a href="question_detail.php?id=<?= $question['question_id']; ?>">
+                    <a href="../controller/forum_controller.php?action=question_detail&id=<?= $question['question_id']; ?>">
                         <?= htmlspecialchars($question['title']); ?>
                     </a>
                 </h4>

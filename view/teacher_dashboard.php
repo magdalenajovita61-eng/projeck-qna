@@ -38,9 +38,8 @@ if (!isset($users)) {
                     <td><?= htmlspecialchars($user['role']); ?></td>
                     <td><?= htmlspecialchars($user['school_name']); ?></td>
                     <td>
-                        <!-- Actions like edit or delete can be implemented here -->
-                        <a href="edit_user.php?id=<?= $user['user_id']; ?>">Edit</a> |
-                        <a href="delete_user.php?id=<?= $user['user_id']; ?>" onclick="return confirm('Are you sure you want to delete this user?');">Delete</a>
+                        <a href="../controller/teacher_controller.php?action=edit_user&id=<?= $user['user_id']; ?>">Edit</a> |
+                        <a href="../controller/teacher_controller.php?action=delete_user&id=<?= $user['user_id']; ?>" onclick="return confirm('Are you sure you want to delete this user?');">Delete</a>
                     </td>
                 </tr>
                 <?php endforeach; ?>

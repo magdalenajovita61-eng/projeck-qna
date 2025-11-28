@@ -60,4 +60,29 @@ function get_user_by_id($user_id) {
     $result = mysqli_query($conn, $query);
     return mysqli_fetch_assoc($result);
 }
+
+// Added function: update_user
+function update_user($user_id, $name, $email, $role, $school_id) {
+    global $conn;
+    $user_id = (int)$user_id;
+    $name = mysqli_real_escape_string($conn, $name);
+    $email = mysqli_real_escape_string($conn, $email);
+    $role = mysqli_real_escape_string($conn, $role);
+    $school_id = (int)$school_id;
+
+    $query = "UPDATE user SET name = '$name', email = '$email', role = '$role', school_id = $school_id WHERE user_id = $user_id";
+    $result = mysqli_query($conn, $query);
+    if (!$result) {
+        return "Database error: " . mysqli_error($conn);
+    }
+    return true;
+}
+
+// Added function: delete_user
+function delete_user($user_id) {
+    global $conn;
+    $user_id = mysqli_real_escape_string($conn, $user_id);
+    $query = "DELETE FROM user WHERE user_id = '$user_id'";
+    return mysqli_query($conn, $query);
+}
 ?>
